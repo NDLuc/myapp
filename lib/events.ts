@@ -51,6 +51,7 @@ function mapRow(row: TrackingRow): AnomalyEvent {
       timeZone: "Asia/Ho_Chi_Minh",
     }),
     date: d.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
+    ts: d.getTime(),
     // No address column in the table: show coordinates as the primary label
     street: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
     district: abnormalLabel(row.abnormal),

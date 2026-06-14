@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { Menu, Search, ChevronRight, ChevronDown } from "lucide-react"
 import { PhoneShell } from "@/components/phone-shell"
@@ -8,14 +8,44 @@ import { BottomNav } from "@/components/bottom-nav"
 import { LevelBadge, SyncBadge } from "@/components/badges"
 import type { AnomalyEvent } from "@/lib/events-types"
 
-const ranges = [
-  { key: "today", label: "Hôm nay", count: 12 },
-  { key: "7days", label: "7 ngày qua", count: 38 },
-  { key: "30days", label: "30 ngày qua", count: 126 },
-] as const
+type RangeKey = "today" | "7days" | "30days"
+const DAY_MS = 24 * 60 * 60 * 1000
+
+// Start of "today" in Asia/Ho_Chi_Minh (UTC+7), as epoch millis
+function startOfTodayVN(): number {
+  const now = Date.now()
+  return Math.floor((now + 7 * 60 * 60 * 1000) / DAY_MS) * DAY_MS - 7 * 60 * 60 * 1000
+}
 
 export function EventsScreen({ events }: { events: AnomalyEvent[] }) {
-  const [range, setRange] = useState<(typeof ranges)[number]["key"]>("today")
+  const [range, setRange] = useState<RangeKey>("today")
+  const [sortDesc, setSortDesc] = useState(true)
+
+  const todayStart = useMemo(() => startOfTodayVN(), [])
+
+  const counts = useMemo(() => {
+    const now = Date.now()
+    return {
+      today: events.filter((e) => e.ts >= todayStart).length,
+      "7days": events.filter((e) => e.ts >= now - 7 * DAY_MS).length,
+      "30days": events.filter((e) => e.ts >= now - 30 * DAY_MS).length,
+    }
+  }, [events, todayStart])
+
+  const ranges = [
+    { key: "today" as const, label: "Hôm nay", count: counts.today },
+    { key: "7days" as const, label: "7 ngày qua", count: counts["7days"] },
+    { key: "30days" as const, label: "30 ngày qua", count: counts["30days"] },
+  ]
+
+  const visibleEvents = useMemo(() => {
+    const now = Date.now()
+    const from =
+      range === "today" ? todayStart : range === "7days" ? now - 7 * DAY_MS : now - 30 * DAY_MS
+    return events
+      .filter((e) => e.ts >= from)
+      .sort((a, b) => (sortDesc ? b.ts - a.ts : a.ts - b.ts))
+  }, [events, range, sortDesc, todayStart])
 
   return (
     <PhoneShell>
@@ -59,20 +89,22 @@ export function EventsScreen({ events }: { events: AnomalyEvent[] }) {
       {/* list header */}
       <div className="flex items-center justify-between px-4 pb-2">
         <p className="text-sm font-medium text-muted-foreground">
-          {events.length} sự kiện
+          {visibleEvents.length} sự kiện
         </p>
         <button
           type="button"
+          onClick={() => setSortDesc((v) => !v)}
           className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground"
         >
-          Mới nhất <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          {sortDesc ? "Mới nhất" : "Cũ nhất"}{" "}
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </div>
 
       {/* list */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         <ul className="flex flex-col gap-3">
-          {events.map((e) => (
+          {visibleEvents.map((e) => (
             <li key={e.id}>
               <Link
                 href={`/events/${e.id}`}

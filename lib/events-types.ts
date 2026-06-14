@@ -5,6 +5,8 @@ export type AnomalyEvent = {
   id: string
   time: string
   date: string
+  // epoch millis of the event, used for filtering/sorting by time range
+  ts: number
   street: string
   district: string
   level: VibrationLevel
