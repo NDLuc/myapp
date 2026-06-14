@@ -51,7 +51,7 @@ export function MapScreen({
       <div className="px-4 pb-3">
         <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
             <div className="grid grid-cols-2 items-center divide-x divide-border">
-              <div className="pr-3">
+              <div className="flex flex-col items-center pr-3 text-center">
               <p className="text-xs text-muted-foreground">Tổng điểm bất thường</p>
               <div className="mt-1 flex items-baseline gap-1.5">
                 <span className="text-2xl font-bold text-destructive">
@@ -67,7 +67,7 @@ export function MapScreen({
                 <button
                   type="button"
                   onClick={openDatePicker}
-                  className="flex w-full flex-col items-start text-left"
+                  className="flex w-full cursor-pointer flex-col items-center text-center"
                 >
                   <span className="text-xs text-muted-foreground">Ngày</span>
                   <span className="mt-1 flex items-center gap-1 text-sm font-semibold text-foreground">
@@ -80,7 +80,7 @@ export function MapScreen({
                   type="date"
                   value={dateIso}
                   onChange={(e) => setDateIso(e.target.value)}
-                  className="pointer-events-none absolute bottom-0 left-3 h-0 w-0 opacity-0"
+                  className="pointer-events-none absolute bottom-0 left-1/2 h-0 w-0 -translate-x-1/2 opacity-0"
                   aria-label="Chọn ngày"
                   tabIndex={-1}
                 />
