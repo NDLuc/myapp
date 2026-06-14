@@ -35,7 +35,7 @@ export function MapScreen({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* stats card */}
-      <div className="px-4 pb-3">
+      <div className="relative z-[1000] px-4 pb-3">
         <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
             <div className="grid grid-cols-2 items-center divide-x divide-border">
               <div className="flex flex-col items-center pr-3 text-center">

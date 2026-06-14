@@ -117,7 +117,7 @@ export function DatePickerDropdown({
         <div
           role="dialog"
           aria-label="Chọn ngày"
-          className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-border bg-popover p-3 shadow-lg"
+          className="absolute right-0 top-full z-[1100] mt-2 w-64 rounded-xl border border-border bg-popover p-3 shadow-lg"
         >
           <div className="flex items-center justify-between">
             <button
