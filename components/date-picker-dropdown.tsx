@@ -33,10 +33,13 @@ export function DatePickerDropdown({
   value,
   onChange,
   label = "Ngày",
+  markedDates,
 }: {
   value: string
   onChange: (iso: string) => void
   label?: string
+  // tập các ngày (ISO yyyy-mm-dd) có điểm bất thường để đánh dấu
+  markedDates?: Set<string>
 }) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -154,19 +157,29 @@ export function DatePickerDropdown({
               if (d === null) return <div key={`e-${i}`} className="h-8" />
               const iso = toIso(viewYear, viewMonth, d)
               const isSelected = iso === value
+              const hasAnomaly = markedDates?.has(iso) ?? false
               return (
                 <button
                   key={iso}
                   type="button"
                   onClick={() => selectDay(d)}
                   className={
-                    "flex h-8 items-center justify-center rounded-md text-sm transition-colors " +
+                    "relative flex h-8 items-center justify-center rounded-md text-sm transition-colors " +
                     (isSelected
                       ? "bg-primary font-semibold text-primary-foreground"
                       : "text-foreground hover:bg-muted")
                   }
                 >
                   {d}
+                  {hasAnomaly && (
+                    <span
+                      aria-label="Có điểm bất thường"
+                      className={
+                        "absolute bottom-1 h-1 w-1 rounded-full " +
+                        (isSelected ? "bg-primary-foreground" : "bg-destructive")
+                      }
+                    />
+                  )}
                 </button>
               )
             })}
