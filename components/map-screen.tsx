@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
-import { Calendar } from "lucide-react"
+import { useMemo, useState } from "react"
 import { AnomalyMap } from "@/components/anomaly-map"
+import { DatePickerDropdown } from "@/components/date-picker-dropdown"
 import type { AnomalyEvent } from "@/lib/events-types"
 
 // "2026-06-14" -> "14/6/2026" (khớp định dạng vi-VN của event.date)
@@ -24,19 +24,6 @@ export function MapScreen({
   focusId?: string
 }) {
   const [dateIso, setDateIso] = useState<string>(todayIso())
-  const dateInputRef = useRef<HTMLInputElement>(null)
-
-  function openDatePicker() {
-    const el = dateInputRef.current
-    if (!el) return
-    // showPicker mở native calendar; fallback focus/click cho trình duyệt cũ
-    if (typeof el.showPicker === "function") {
-      el.showPicker()
-    } else {
-      el.focus()
-      el.click()
-    }
-  }
 
   const displayDate = isoToDisplay(dateIso)
 
@@ -63,28 +50,9 @@ export function MapScreen({
                 </span>
               </div>
             </div>
-              <div className="relative pl-3">
-                <button
-                  type="button"
-                  onClick={openDatePicker}
-                  className="flex w-full cursor-pointer flex-col items-center text-center"
-                >
-                  <span className="text-xs text-muted-foreground">Ngày</span>
-                  <span className="mt-1 flex items-center gap-1 text-sm font-semibold text-foreground">
-                    {displayDate}
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                  </span>
-                </button>
-                <input
-                  ref={dateInputRef}
-                  type="date"
-                  value={dateIso}
-                  onChange={(e) => setDateIso(e.target.value)}
-                  className="pointer-events-none absolute bottom-0 left-1/2 h-0 w-0 -translate-x-1/2 opacity-0"
-                  aria-label="Chọn ngày"
-                  tabIndex={-1}
-                />
-            </div>
+              <div className="pl-3">
+                <DatePickerDropdown value={dateIso} onChange={setDateIso} />
+              </div>
           </div>
         </div>
       </div>
