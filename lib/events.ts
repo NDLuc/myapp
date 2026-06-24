@@ -85,26 +85,18 @@ function mapRow(row: TrackingRow): AnomalyEvent {
 }
 
 export async function getEvents(): Promise<AnomalyEvent[]> {
-  console.log("[v0] getEvents called")
   const supabase = await createClient()
-  console.log("[v0] supabase client created")
   const { data, error } = await supabase
     .from("dataTracking")
     .select("*")
-    .in("packet_type", ["warning", "keepalive"])
     .order("created_at", { ascending: false })
 
   if (error) {
-    console.log("[v0] getEvents error:", error.message, error)
+    console.log("[v0] getEvents error:", error.message)
     return []
   }
-  console.log("[v0] getEvents rows fetched:", data?.length)
-  if (data?.[0]) {
-    console.log("[v0] first row sample:", JSON.stringify(data[0]).substring(0, 200))
-  }
-  const mapped = (data as TrackingRow[]).map(mapRow)
-  console.log("[v0] mapped events count:", mapped.length)
-  return mapped
+
+  return (data as TrackingRow[]).map(mapRow)
 }
 
 export async function getEvent(id: string): Promise<AnomalyEvent | null> {
