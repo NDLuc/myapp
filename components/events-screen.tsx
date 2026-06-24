@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Menu, Search, ChevronRight, ChevronDown } from "lucide-react"
+import { ChevronRight, ChevronDown } from "lucide-react"
 import { PhoneShell } from "@/components/phone-shell"
 import { BottomNav } from "@/components/bottom-nav"
 import { LevelBadge, SyncBadge } from "@/components/badges"
@@ -49,14 +49,8 @@ export function EventsScreen({ events }: { events: AnomalyEvent[] }) {
 
   return (
     <PhoneShell>
-      <header className="flex items-center justify-between px-4 pt-5 pb-3">
-        <button type="button" aria-label="Menu" className="p-1 text-foreground">
-          <Menu className="h-6 w-6" />
-        </button>
+      <header className="flex items-center justify-center px-4 pt-5 pb-3">
         <h1 className="text-lg font-semibold text-foreground">Sự kiện bất thường</h1>
-        <button type="button" aria-label="Tìm kiếm" className="p-1 text-foreground">
-          <Search className="h-5 w-5" />
-        </button>
       </header>
 
       {/* range tabs */}

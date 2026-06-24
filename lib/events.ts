@@ -8,81 +8,125 @@ import type {
 export type { AnomalyEvent, SyncStatus, VibrationLevel } from "@/lib/events-types"
 export { LEVEL_LABEL } from "@/lib/events-types"
 
-// Real row shape from the public."Tracking" table in Supabase
+// Real row shape from the public."dataTracking" table in Supabase
 type TrackingRow = {
-  id: number | string
+  id: string
+  device_id: string
+  packet_type: "warning" | "keepalive"
+  status: string | null
+  anomaly_score: number | null
+  idle_prob: number | null
+  normal_prob: number | null
+  lat: number | null
+  lng: number | null
+  speed_kmh: number | null
+  device_time: string | null
   created_at: string
-  lat: number | string | null
-  long: number | string | null
-  time: string | null
-  speed: number | string | null
-  vibrate: number | string | null
-  abnormal: string | null
 }
 
-function levelFromAbnormal(abnormal: string | null): VibrationLevel {
-  // "hard" (and similar strong signals) => high, otherwise medium
-  const a = (abnormal ?? "").toLowerCase()
-  return a.includes("hard") || a.includes("high") || a.includes("cao")
-    ? "high"
-    : "medium"
+function levelFromAnomalyScore(score: number | null): VibrationLevel {
+  // anomaly_score cao => high risk, thấp => medium
+  if (!score) return "medium"
+  return score > 0.7 ? "high" : "medium"
 }
 
-function abnormalLabel(abnormal: string | null): string {
-  if (!abnormal) return "Bất thường"
+function statusLabel(status: string | null): string {
+  if (!status) return "Bất thường"
   const map: Record<string, string> = {
-    hard: "Rung mạnh",
-    soft: "Rung nhẹ",
-    medium: "Rung trung bình",
+    "rung mạnh": "Rung mạnh",
+    "rung nhẹ": "Rung nhẹ",
+    "rung trung bình": "Rung trung bình",
   }
-  return map[abnormal.toLowerCase()] ?? abnormal
+  return map[status.toLowerCase()] ?? status
+}
+
+function parseDeviceTime(deviceTime: string | null): Date {
+  if (!deviceTime) return new Date()
+  // Parse format "25/06/2026 - 01:02:15" to Date
+  const match = deviceTime.match(/(\d{2})\/(\d{2})\/(\d{4})\s*-\s*(\d{2}):(\d{2}):(\d{2})/)
+  if (match) {
+    const [, d, m, y, h, min, s] = match
+    return new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s))
+  }
+  // Fallback: try ISO/standard format
+  try {
+    return new Date(deviceTime)
+  } catch {
+    return new Date()
+  }
 }
 
 function mapRow(row: TrackingRow): AnomalyEvent {
-  const d = new Date(row.time ?? row.created_at)
-  const lat = Number(row.lat ?? 0)
-  const lng = Number(row.long ?? 0)
-  return {
-    id: String(row.id),
-    time: d.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Ho_Chi_Minh",
-    }),
-    date: d.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
-    ts: d.getTime(),
-    // No address column in the table: show coordinates as the primary label
-    street: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-    district: abnormalLabel(row.abnormal),
-    level: levelFromAbnormal(row.abnormal),
-    sync: "synced",
-    speed: Number(row.speed ?? 0),
-    vibration: Number(row.vibrate ?? 0),
-    lat,
-    lng,
+  try {
+    // Ưu tiên device_time nếu có, không thì dùng created_at
+    const d = row.device_time ? parseDeviceTime(row.device_time) : new Date(row.created_at)
+    const lat = Number(row.lat ?? 0)
+    const lng = Number(row.lng ?? 0)
+    const event: AnomalyEvent = {
+      id: String(row.id),
+      time: d.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Ho_Chi_Minh",
+      }),
+      date: d.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
+      ts: d.getTime(),
+      // Hiển thị device_id và tọa độ
+      street: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+      district: statusLabel(row.status),
+      level: levelFromAnomalyScore(row.anomaly_score),
+      sync: "synced",
+      speed: Number(row.speed_kmh ?? 0),
+      vibration: Number(row.anomaly_score ?? 0),
+      lat,
+      lng,
+      packetType: row.packet_type,
+    }
+    return event
+  } catch (err) {
+    console.log("[v0] mapRow error for", row.id, ":", err instanceof Error ? err.message : String(err))
+    throw err
   }
 }
 
 export async function getEvents(): Promise<AnomalyEvent[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("Tracking")
-    .select("*")
-    .order("time", { ascending: false })
+  console.log("[v0] getEvents: fetching from dataTracking")
+  try {
+    const supabase = await createClient()
+    console.log("[v0] supabase client ready")
 
-  if (error) {
-    console.log("[v0] getEvents error:", error.message)
+    const { data, error } = await supabase
+      .from("dataTracking")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    console.log("[v0] query result - error:", error?.message, "data length:", data?.length)
+
+    if (error) {
+      console.error("[v0] getEvents query error:", error)
+      return []
+    }
+
+    if (!data || data.length === 0) {
+      console.log("[v0] no data returned from dataTracking")
+      return []
+    }
+
+    console.log("[v0] first row:", JSON.stringify(data[0]).substring(0, 300))
+    const mapped = (data as TrackingRow[]).map(mapRow)
+    console.log("[v0] mapped", mapped.length, "events")
+    return mapped
+  } catch (err) {
+    console.error("[v0] getEvents exception:", err)
     return []
   }
-  console.log("[v0] getEvents rows:", data?.length, JSON.stringify(data?.[0]))
-  return (data as TrackingRow[]).map(mapRow)
 }
 
 export async function getEvent(id: string): Promise<AnomalyEvent | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from("Tracking")
+    .from("dataTracking")
     .select("*")
     .eq("id", id)
     .maybeSingle()
