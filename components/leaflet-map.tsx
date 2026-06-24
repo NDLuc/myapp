@@ -65,13 +65,15 @@ export default function LeafletMap({
       />
 
       {events.map((e) => {
-        const high = e.level === "high"
-        const color = high ? "#dc2626" : "#f59e0b"
+        // warning = red, keepalive = green
+        const isWarning = e.packetType === "warning"
+        const color = isWarning ? "#dc2626" : "#22c55e"
+        const radius = isWarning ? 12 : 9
         return (
           <CircleMarker
             key={e.id}
             center={[e.lat, e.lng]}
-            radius={high ? 14 : 11}
+            radius={radius}
             pathOptions={{
               color,
               fillColor: color,

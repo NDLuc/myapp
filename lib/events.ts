@@ -64,6 +64,7 @@ function mapRow(row: TrackingRow): AnomalyEvent {
     vibration: Number(row.anomaly_score ?? 0),
     lat,
     lng,
+    packetType: row.packet_type,
   }
 }
 
@@ -72,7 +73,7 @@ export async function getEvents(): Promise<AnomalyEvent[]> {
   const { data, error } = await supabase
     .from("dataTracking")
     .select("*")
-    .eq("packet_type", "warning")
+    .in("packet_type", ["warning", "keepalive"])
     .order("created_at", { ascending: false })
 
   if (error) {

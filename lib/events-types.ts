@@ -16,6 +16,8 @@ export type AnomalyEvent = {
   // real geographic coordinates from Supabase
   lat: number
   lng: number
+  // packet type: warning = red, keepalive = green
+  packetType: "warning" | "keepalive"
 }
 
 export const LEVEL_LABEL: Record<VibrationLevel, string> = {
