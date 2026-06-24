@@ -57,46 +57,70 @@ function parseDeviceTime(deviceTime: string | null): Date {
 }
 
 function mapRow(row: TrackingRow): AnomalyEvent {
-  // Ưu tiên device_time nếu có, không thì dùng created_at
-  const d = row.device_time ? parseDeviceTime(row.device_time) : new Date(row.created_at)
-  const lat = Number(row.lat ?? 0)
-  const lng = Number(row.lng ?? 0)
-  return {
-    id: String(row.id),
-    time: d.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Ho_Chi_Minh",
-    }),
-    date: d.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
-    ts: d.getTime(),
-    // Hiển thị device_id và tọa độ
-    street: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-    district: statusLabel(row.status),
-    level: levelFromAnomalyScore(row.anomaly_score),
-    sync: "synced",
-    speed: Number(row.speed_kmh ?? 0),
-    vibration: Number(row.anomaly_score ?? 0),
-    lat,
-    lng,
-    packetType: row.packet_type,
+  try {
+    // Ưu tiên device_time nếu có, không thì dùng created_at
+    const d = row.device_time ? parseDeviceTime(row.device_time) : new Date(row.created_at)
+    const lat = Number(row.lat ?? 0)
+    const lng = Number(row.lng ?? 0)
+    const event: AnomalyEvent = {
+      id: String(row.id),
+      time: d.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Ho_Chi_Minh",
+      }),
+      date: d.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
+      ts: d.getTime(),
+      // Hiển thị device_id và tọa độ
+      street: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+      district: statusLabel(row.status),
+      level: levelFromAnomalyScore(row.anomaly_score),
+      sync: "synced",
+      speed: Number(row.speed_kmh ?? 0),
+      vibration: Number(row.anomaly_score ?? 0),
+      lat,
+      lng,
+      packetType: row.packet_type,
+    }
+    return event
+  } catch (err) {
+    console.log("[v0] mapRow error for", row.id, ":", err instanceof Error ? err.message : String(err))
+    throw err
   }
 }
 
 export async function getEvents(): Promise<AnomalyEvent[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("dataTracking")
-    .select("*")
-    .order("created_at", { ascending: false })
+  console.log("[v0] getEvents: fetching from dataTracking")
+  try {
+    const supabase = await createClient()
+    console.log("[v0] supabase client ready")
 
-  if (error) {
-    console.log("[v0] getEvents error:", error.message)
+    const { data, error } = await supabase
+      .from("dataTracking")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    console.log("[v0] query result - error:", error?.message, "data length:", data?.length)
+
+    if (error) {
+      console.error("[v0] getEvents query error:", error)
+      return []
+    }
+
+    if (!data || data.length === 0) {
+      console.log("[v0] no data returned from dataTracking")
+      return []
+    }
+
+    console.log("[v0] first row:", JSON.stringify(data[0]).substring(0, 300))
+    const mapped = (data as TrackingRow[]).map(mapRow)
+    console.log("[v0] mapped", mapped.length, "events")
+    return mapped
+  } catch (err) {
+    console.error("[v0] getEvents exception:", err)
     return []
   }
-
-  return (data as TrackingRow[]).map(mapRow)
 }
 
 export async function getEvent(id: string): Promise<AnomalyEvent | null> {
