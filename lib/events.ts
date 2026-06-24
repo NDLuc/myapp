@@ -40,9 +40,25 @@ function statusLabel(status: string | null): string {
   return map[status.toLowerCase()] ?? status
 }
 
+function parseDeviceTime(deviceTime: string | null): Date {
+  if (!deviceTime) return new Date()
+  // Parse format "25/06/2026 - 01:02:15" to Date
+  const match = deviceTime.match(/(\d{2})\/(\d{2})\/(\d{4})\s*-\s*(\d{2}):(\d{2}):(\d{2})/)
+  if (match) {
+    const [, d, m, y, h, min, s] = match
+    return new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s))
+  }
+  // Fallback: try ISO/standard format
+  try {
+    return new Date(deviceTime)
+  } catch {
+    return new Date()
+  }
+}
+
 function mapRow(row: TrackingRow): AnomalyEvent {
   // Ưu tiên device_time nếu có, không thì dùng created_at
-  const d = new Date(row.device_time ?? row.created_at)
+  const d = row.device_time ? parseDeviceTime(row.device_time) : new Date(row.created_at)
   const lat = Number(row.lat ?? 0)
   const lng = Number(row.lng ?? 0)
   return {
