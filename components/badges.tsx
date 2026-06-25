@@ -10,7 +10,7 @@ export function LevelBadge({ level }: { level: VibrationLevel }) {
         "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
         level === "high"
           ? "bg-destructive/10 text-destructive"
-          : "bg-amber-500/15 text-amber-600",
+          : "bg-green-500/15 text-green-600",
       )}
     >
       {LEVEL_LABEL[level]}

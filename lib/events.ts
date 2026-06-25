@@ -35,7 +35,8 @@ function statusLabel(status: string | null): string {
   const map: Record<string, string> = {
     "rung mạnh": "Rung mạnh",
     "rung nhẹ": "Rung nhẹ",
-    "rung trung bình": "Rung trung bình",
+    "rung trung bình": "Bình thường",
+    online: "Bình thường",
   }
   return map[status.toLowerCase()] ?? status
 }
@@ -114,8 +115,15 @@ export async function getEvents(): Promise<AnomalyEvent[]> {
     }
 
     console.log("[v0] first row:", JSON.stringify(data[0]).substring(0, 300))
-    const mapped = (data as TrackingRow[]).map(mapRow)
-    console.log("[v0] mapped", mapped.length, "events")
+    const mapped = (data as TrackingRow[])
+      .filter((row) => {
+        // Bỏ qua events với lat/lng = null hoặc = 0
+        const lat = Number(row.lat ?? 0)
+        const lng = Number(row.lng ?? 0)
+        return lat !== 0 && lng !== 0
+      })
+      .map(mapRow)
+    console.log("[v0] mapped", mapped.length, "events after filtering")
     return mapped
   } catch (err) {
     console.error("[v0] getEvents exception:", err)
