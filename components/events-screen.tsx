@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ChevronRight, ChevronDown } from "lucide-react"
 import { PhoneShell } from "@/components/phone-shell"
 import { BottomNav } from "@/components/bottom-nav"
-import { LevelBadge, SyncBadge } from "@/components/badges"
+import { LevelBadge } from "@/components/badges"
 import type { AnomalyEvent } from "@/lib/events-types"
 
 type RangeKey = "today" | "7days" | "30days"
@@ -121,7 +121,6 @@ export function EventsScreen({ events }: { events: AnomalyEvent[] }) {
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <LevelBadge level={e.level} />
-                    <SyncBadge status={e.sync} />
                   </div>
                 </div>
               </Link>

@@ -44,10 +44,15 @@ function statusLabel(status: string | null): string {
 function parseDeviceTime(deviceTime: string | null): Date {
   if (!deviceTime) return new Date()
   // Parse format "25/06/2026 - 01:02:15" to Date
+  // device_time từ Supabase đã ở giờ Việt Nam (UTC+7)
+  // Chúng ta parse nó như UTC rồi offset để lấy epoch millis đúng
   const match = deviceTime.match(/(\d{2})\/(\d{2})\/(\d{4})\s*-\s*(\d{2}):(\d{2}):(\d{2})/)
   if (match) {
     const [, d, m, y, h, min, s] = match
-    return new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s))
+    // Tạo Date như UTC
+    const utcDate = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s)))
+    // device_time là giờ Việt Nam (UTC+7), nên phải trừ đi 7 giờ để lấy UTC thực
+    return new Date(utcDate.getTime() - 7 * 60 * 60 * 1000)
   }
   // Fallback: try ISO/standard format
   try {
