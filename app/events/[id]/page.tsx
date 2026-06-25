@@ -43,7 +43,6 @@ export default async function EventDetailPage({
               <span className="h-3 w-3 rounded-full bg-destructive" />
               {LEVEL_LABEL[event.level]}
             </span>
-            <span className="text-xs text-muted-foreground">ID: {event.id}</span>
           </div>
 
           <dl className="flex flex-col gap-3.5 pt-3.5">
@@ -61,8 +60,12 @@ export default async function EventDetailPage({
             </InfoRow>
             <InfoRow icon={Activity} label="Mức rung">
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-destructive" />
-                {event.level === "high" ? "Cao" : "Trung bình"} ({event.vibration} g)
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    event.level === "high" ? "bg-destructive" : "bg-green-500"
+                  }`}
+                />
+                {event.level === "high" ? "Cao" : "Bình thường"} ({event.vibration} g)
               </span>
             </InfoRow>
           </dl>

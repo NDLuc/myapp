@@ -35,7 +35,8 @@ function statusLabel(status: string | null): string {
   const map: Record<string, string> = {
     "rung mạnh": "Rung mạnh",
     "rung nhẹ": "Rung nhẹ",
-    "rung trung bình": "Rung trung bình",
+    "rung trung bình": "Bình thường",
+    online: "Bình thường",
   }
   return map[status.toLowerCase()] ?? status
 }
@@ -43,10 +44,15 @@ function statusLabel(status: string | null): string {
 function parseDeviceTime(deviceTime: string | null): Date {
   if (!deviceTime) return new Date()
   // Parse format "25/06/2026 - 01:02:15" to Date
+  // device_time từ Supabase đã ở giờ Việt Nam (UTC+7)
+  // Chúng ta parse nó như UTC rồi offset để lấy epoch millis đúng
   const match = deviceTime.match(/(\d{2})\/(\d{2})\/(\d{4})\s*-\s*(\d{2}):(\d{2}):(\d{2})/)
   if (match) {
     const [, d, m, y, h, min, s] = match
-    return new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s))
+    // Tạo Date như UTC
+    const utcDate = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s)))
+    // device_time là giờ Việt Nam (UTC+7), nên phải trừ đi 7 giờ để lấy UTC thực
+    return new Date(utcDate.getTime() - 7 * 60 * 60 * 1000)
   }
   // Fallback: try ISO/standard format
   try {
@@ -114,8 +120,15 @@ export async function getEvents(): Promise<AnomalyEvent[]> {
     }
 
     console.log("[v0] first row:", JSON.stringify(data[0]).substring(0, 300))
-    const mapped = (data as TrackingRow[]).map(mapRow)
-    console.log("[v0] mapped", mapped.length, "events")
+    const mapped = (data as TrackingRow[])
+      .filter((row) => {
+        // Bỏ qua events với lat/lng = null hoặc = 0
+        const lat = Number(row.lat ?? 0)
+        const lng = Number(row.lng ?? 0)
+        return lat !== 0 && lng !== 0
+      })
+      .map(mapRow)
+    console.log("[v0] mapped", mapped.length, "events after filtering")
     return mapped
   } catch (err) {
     console.error("[v0] getEvents exception:", err)
