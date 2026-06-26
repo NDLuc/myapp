@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server"
 import type {
   AnomalyEvent,
   SyncStatus,
@@ -232,16 +232,26 @@ export async function getEvent(id: string): Promise<AnomalyEvent | null> {
 
 export async function deleteEvent(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient()
+    // Use service role client to bypass RLS policies
+    const supabase = createServiceRoleClient()
 
-    const { error } = await supabase
+    console.log("[v0] Attempting to delete event with service role:", id)
+    
+    const { error, status } = await supabase
       .from("dataTracking")
       .delete()
       .eq("id", id)
 
+    console.log("[v0] deleteEvent response - status:", status, "error:", error)
+
     if (error) {
-      console.error("[v0] deleteEvent error:", error.message)
-      return { success: false, error: error.message }
+      console.error("[v0] deleteEvent error:", {
+        message: error.message,
+        code: error.code,
+        hint: error.hint,
+        details: error.details,
+      })
+      return { success: false, error: `${error.message} (${error.code})` }
     }
 
     console.log("[v0] Event deleted successfully:", id)

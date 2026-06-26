@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 
 export async function createClient() {
@@ -40,4 +41,25 @@ export async function createClient() {
       },
     },
   })
+}
+
+export function createServiceRoleClient() {
+  const rawUrl =
+    process.env.NEXT_PUBLIC_TRACKING_SUPABASE_URL ??
+    process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY
+
+  if (!rawUrl || !serviceKey) {
+    throw new Error(
+      "Missing Supabase service role key. Please set SUPABASE_SERVICE_ROLE_KEY.",
+    )
+  }
+
+  // Normalize URL
+  const url = rawUrl.trim().replace(/\/+$/, "").replace(/\/rest\/v1$/, "")
+
+  // Create a client with service role key (bypasses RLS)
+  return createSupabaseClient(url, serviceKey)
 }
