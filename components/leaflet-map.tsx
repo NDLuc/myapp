@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import type { Map as LeafletMapType } from "leaflet"
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
@@ -17,35 +17,34 @@ function MapEffects({
   onReady?: (map: LeafletMapType) => void
 }) {
   const map = useMap()
-  const hasInitialFitRef = useRef(false)
 
-  // expose the map instance to the parent for external controls
+  // Truyền map instance ra ngoài để nút + / - dùng được
   useEffect(() => {
     onReady?.(map)
   }, [map, onReady])
 
-  // focus a single event when requested
+  // Khi có focusId thì nhảy tới điểm đó
+  // Khi không có focusId thì fit theo danh sách events hiện tại
+  // events ở đây phải là filteredEvents từ MapScreen
   useEffect(() => {
-    if (!focusId) return
+    const focused = focusId
+      ? events.find((e) => String(e.id) === String(focusId))
+      : undefined
 
-    const focused = events.find((e) => String(e.id) === String(focusId))
-    if (!focused) return
+    if (focused) {
+      const matchedPoint = findNearestRoadPoint({
+        lat: focused.lat,
+        lng: focused.lng,
+      })
 
-    const matchedPoint = findNearestRoadPoint({
-      lat: focused.lat,
-      lng: focused.lng,
-    })
+      map.setView([matchedPoint.lat, matchedPoint.lng], 16, {
+        animate: false,
+      })
 
-    map.setView([matchedPoint.lat, matchedPoint.lng], 16, {
-      animate: false,
-    })
-  }, [events, focusId, map])
+      return
+    }
 
-  // fit all events only once when the map first loads
-  useEffect(() => {
-    if (hasInitialFitRef.current) return
     if (events.length === 0) return
-    if (focusId) return
 
     const bounds = events.map((e) => {
       const matchedPoint = findNearestRoadPoint({
@@ -61,8 +60,6 @@ function MapEffects({
       maxZoom: 14,
       animate: false,
     })
-
-    hasInitialFitRef.current = true
   }, [events, focusId, map])
 
   return null
