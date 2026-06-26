@@ -49,7 +49,7 @@ export default function RootLayout({
       lang="vi"
       className={`light ${geistSans.variable} ${geistMono.variable} bg-background`}
     >
-      <body className="font-sans antialiased">
+      <body suppressHydrationWarning className="font-sans antialiased">
         <RealtimeRefresh />
 
         {children}

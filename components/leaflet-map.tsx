@@ -72,7 +72,7 @@ export default function LeafletMap({
 
   const center: [number, number] = firstMatchedPoint
     ? [firstMatchedPoint.lat, firstMatchedPoint.lng]
-    : [10.7769, 106.7009]
+    : [21.006246191817212, 105.84315557080627]
 
   return (
     <MapContainer

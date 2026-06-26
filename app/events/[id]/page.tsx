@@ -60,16 +60,16 @@ export default async function EventDetailPage({
                 {event.district}
               </span>
             </InfoRow>
-            <InfoRow icon={Gauge} label="Tốc độ xe">
-              {event.speed} km/h
+            <InfoRow icon={Gauge} label="Tốc độ">
+            {Number(event.speed).toFixed(2)} km/h
             </InfoRow>
             <InfoRow icon={Activity} label="Mức rung">
-              <span className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5">
                 <span
                   className={`h-2 w-2 rounded-full ${event.level === "high" ? "bg-destructive" : "bg-green-500"
                     }`}
                 />
-                {event.level === "high" ? "Cao" : "Bình thường"} ({event.vibration} g)
+                {event.level === "high" ? "Cao" : "Bình thường"} ({event.vibration})
               </span>
             </InfoRow>
           </dl>
