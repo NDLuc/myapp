@@ -5,6 +5,7 @@ import type { Map as LeafletMapType } from "leaflet"
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import type { AnomalyEvent } from "@/lib/events-types"
+import { findNearestRoadPoint } from "@/lib/mapMatching"
 
 function MapEffects({
   events,
@@ -25,12 +26,28 @@ function MapEffects({
   // focus a single event when requested, otherwise fit all events
   useEffect(() => {
     const focused = focusId ? events.find((e) => String(e.id) === String(focusId)) : undefined
+
     if (focused) {
-      map.setView([focused.lat, focused.lng], 16, { animate: true })
+      const matchedPoint = findNearestRoadPoint({
+        lat: focused.lat,
+        lng: focused.lng,
+      })
+
+      map.setView([matchedPoint.lat, matchedPoint.lng], 16, { animate: true })
       return
     }
+
     if (events.length === 0) return
-    const bounds = events.map((e) => [e.lat, e.lng]) as [number, number][]
+
+    const bounds = events.map((e) => {
+      const matchedPoint = findNearestRoadPoint({
+        lat: e.lat,
+        lng: e.lng,
+      })
+
+      return [matchedPoint.lat, matchedPoint.lng]
+    }) as [number, number][]
+
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 })
   }, [events, focusId, map])
 
@@ -46,8 +63,15 @@ export default function LeafletMap({
   focusId?: string
   onReady?: (map: LeafletMapType) => void
 }) {
-  const center: [number, number] = events.length
-    ? [events[0].lat, events[0].lng]
+  const firstMatchedPoint = events.length
+    ? findNearestRoadPoint({
+      lat: events[0].lat,
+      lng: events[0].lng,
+    })
+    : null
+
+  const center: [number, number] = firstMatchedPoint
+    ? [firstMatchedPoint.lat, firstMatchedPoint.lng]
     : [10.7769, 106.7009]
 
   return (
@@ -69,10 +93,16 @@ export default function LeafletMap({
         const isWarning = e.packetType === "warning"
         const color = isWarning ? "#dc2626" : "#22c55e"
         const radius = isWarning ? 12 : 9
+
+        const matchedPoint = findNearestRoadPoint({
+          lat: e.lat,
+          lng: e.lng,
+        })
+
         return (
           <CircleMarker
             key={e.id}
-            center={[e.lat, e.lng]}
+            center={[matchedPoint.lat, matchedPoint.lng]}
             radius={radius}
             pathOptions={{
               color,

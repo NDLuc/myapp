@@ -9,10 +9,12 @@ import {
   Activity,
   Info,
   Map,
+  Trash2,
 } from "lucide-react"
 import { PhoneShell } from "@/components/phone-shell"
 import { EventMiniMap } from "@/components/event-mini-map"
 import { LEVEL_LABEL, getEvent } from "@/lib/events"
+import { DeleteEventButton } from "@/components/delete-event-button"
 
 export default async function EventDetailPage({
   params,
@@ -40,7 +42,10 @@ export default async function EventDetailPage({
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <span className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <span className="h-3 w-3 rounded-full bg-destructive" />
+              <span
+                className={`h-3 w-3 rounded-full ${event.level === "high" ? "bg-destructive" : "bg-green-500"
+                  }`}
+              />
               {LEVEL_LABEL[event.level]}
             </span>
           </div>
@@ -61,9 +66,8 @@ export default async function EventDetailPage({
             <InfoRow icon={Activity} label="Mức rung">
               <span className="flex items-center gap-1.5">
                 <span
-                  className={`h-2 w-2 rounded-full ${
-                    event.level === "high" ? "bg-destructive" : "bg-green-500"
-                  }`}
+                  className={`h-2 w-2 rounded-full ${event.level === "high" ? "bg-destructive" : "bg-green-500"
+                    }`}
                 />
                 {event.level === "high" ? "Cao" : "Bình thường"} ({event.vibration} g)
               </span>
@@ -94,6 +98,7 @@ export default async function EventDetailPage({
             <Map className="h-5 w-5" />
             Xem trên bản đồ
           </Link>
+          <DeleteEventButton eventId={event.id} />
         </div>
       </div>
     </PhoneShell>

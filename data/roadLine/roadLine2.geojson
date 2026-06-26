@@ -1,0 +1,165 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-turbo",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2026-06-26T11:32:37Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1327169220",
+        "highway": "tertiary",
+        "oneway": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.024129,
+            21.1304101
+          ],
+          [
+            106.0234431,
+            21.1299649
+          ],
+          [
+            106.0192108,
+            21.1272446
+          ],
+          [
+            106.0179738,
+            21.126467
+          ],
+          [
+            106.0175449,
+            21.1261891
+          ],
+          [
+            106.0165633,
+            21.1255086
+          ]
+        ]
+      },
+      "id": "way/1327169220"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1327169223",
+        "highway": "tertiary",
+        "oneway": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.0166543,
+            21.1254134
+          ],
+          [
+            106.0193,
+            21.127127
+          ],
+          [
+            106.0235192,
+            21.1298575
+          ],
+          [
+            106.0242041,
+            21.1303027
+          ]
+        ]
+      },
+      "id": "way/1327169223"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1327169226",
+        "highway": "tertiary",
+        "oneway": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.0240873,
+            21.1304828
+          ],
+          [
+            106.0233947,
+            21.1300331
+          ],
+          [
+            106.0191566,
+            21.1273161
+          ],
+          [
+            106.0164875,
+            21.1255727
+          ]
+        ]
+      },
+      "id": "way/1327169226"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1327169229",
+        "highway": "tertiary",
+        "oneway": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.0167025,
+            21.1253559
+          ],
+          [
+            106.0193537,
+            21.1270562
+          ],
+          [
+            106.0235808,
+            21.1297706
+          ],
+          [
+            106.0242654,
+            21.1302271
+          ]
+        ]
+      },
+      "id": "way/1327169229"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/1327169232",
+        "highway": "secondary_link"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.0191566,
+            21.1273161
+          ],
+          [
+            106.0192108,
+            21.1272446
+          ],
+          [
+            106.0193,
+            21.127127
+          ],
+          [
+            106.0193537,
+            21.1270562
+          ]
+        ]
+      },
+      "id": "way/1327169232"
+    }
+  ]
+}
