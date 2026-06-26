@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import type { Map as LeafletMapType } from "leaflet"
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
@@ -17,27 +17,35 @@ function MapEffects({
   onReady?: (map: LeafletMapType) => void
 }) {
   const map = useMap()
+  const hasInitialFitRef = useRef(false)
 
   // expose the map instance to the parent for external controls
   useEffect(() => {
     onReady?.(map)
   }, [map, onReady])
 
-  // focus a single event when requested, otherwise fit all events
+  // focus a single event when requested
   useEffect(() => {
-    const focused = focusId ? events.find((e) => String(e.id) === String(focusId)) : undefined
+    if (!focusId) return
 
-    if (focused) {
-      const matchedPoint = findNearestRoadPoint({
-        lat: focused.lat,
-        lng: focused.lng,
-      })
+    const focused = events.find((e) => String(e.id) === String(focusId))
+    if (!focused) return
 
-      map.setView([matchedPoint.lat, matchedPoint.lng], 16, { animate: true })
-      return
-    }
+    const matchedPoint = findNearestRoadPoint({
+      lat: focused.lat,
+      lng: focused.lng,
+    })
 
+    map.setView([matchedPoint.lat, matchedPoint.lng], 16, {
+      animate: false,
+    })
+  }, [events, focusId, map])
+
+  // fit all events only once when the map first loads
+  useEffect(() => {
+    if (hasInitialFitRef.current) return
     if (events.length === 0) return
+    if (focusId) return
 
     const bounds = events.map((e) => {
       const matchedPoint = findNearestRoadPoint({
@@ -48,7 +56,13 @@ function MapEffects({
       return [matchedPoint.lat, matchedPoint.lng]
     }) as [number, number][]
 
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 })
+    map.fitBounds(bounds, {
+      padding: [48, 48],
+      maxZoom: 14,
+      animate: false,
+    })
+
+    hasInitialFitRef.current = true
   }, [events, focusId, map])
 
   return null
@@ -65,9 +79,9 @@ export default function LeafletMap({
 }) {
   const firstMatchedPoint = events.length
     ? findNearestRoadPoint({
-      lat: events[0].lat,
-      lng: events[0].lng,
-    })
+        lat: events[0].lat,
+        lng: events[0].lng,
+      })
     : null
 
   const center: [number, number] = firstMatchedPoint
@@ -89,7 +103,6 @@ export default function LeafletMap({
       />
 
       {events.map((e) => {
-        // warning = red, keepalive = green
         const isWarning = e.packetType === "warning"
         const color = isWarning ? "#dc2626" : "#22c55e"
         const radius = isWarning ? 12 : 9
