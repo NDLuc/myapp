@@ -9,7 +9,7 @@ const tabs = [
   { href: "/", label: "Bản đồ", icon: MapPin, match: (p: string) => p === "/" },
   {
     href: "/events",
-    label: "Sự kiện",
+    label: "Lịch sử",
     icon: ListChecks,
     match: (p: string) => p.startsWith("/events"),
   },

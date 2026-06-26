@@ -33,7 +33,7 @@ export default async function MapPage({
     <PhoneShell>
       {/* header */}
       <header className="flex items-center justify-center px-4 pt-5 pb-3">
-        <h1 className="text-lg font-semibold text-foreground">Vị trí bất thường</h1>
+        <h1 className="text-lg font-semibold text-foreground">Bản đồ giám sát</h1>
       </header>
 
       <Suspense fallback={<MapScreenFallback />}>

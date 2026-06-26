@@ -50,7 +50,7 @@ export function EventsScreen({ events }: { events: AnomalyEvent[] }) {
   return (
     <PhoneShell>
       <header className="flex items-center justify-center px-4 pt-5 pb-3">
-        <h1 className="text-lg font-semibold text-foreground">Sự kiện bất thường</h1>
+        <h1 className="text-lg font-semibold text-foreground">Lịch sử giám sát</h1>
       </header>
 
       {/* range tabs */}
@@ -64,8 +64,8 @@ export function EventsScreen({ events }: { events: AnomalyEvent[] }) {
                 type="button"
                 onClick={() => setRange(r.key)}
                 className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 transition-colors ${active
-                    ? "border-primary bg-accent text-primary"
-                    : "border-border bg-card text-foreground"
+                  ? "border-primary bg-accent text-primary"
+                  : "border-border bg-card text-foreground"
                   }`}
               >
                 <span className="text-sm font-medium">{r.label}</span>
