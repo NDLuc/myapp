@@ -21,7 +21,7 @@ type RailwayMqttPayload = {
   lng?: number | null;
   speed_kmh?: number | null;
 
-  time?: string;
+  device_time?: string;
 };
 
 function getEnv(name: string): string {
@@ -111,7 +111,7 @@ function buildSupabaseRow(payload: RailwayMqttPayload) {
     lng: locationIsValid ? lng : null,
     speed_kmh: locationIsValid ? speedKmh : null,
 
-    device_time: normalizeDeviceTime(payload.time),
+    device_time: normalizeDeviceTime(payload.device_time),
   };
 }
 
