@@ -21,7 +21,7 @@ type RailwayMqttPayload = {
   lng?: number | null;
   speed_kmh?: number | null;
 
-  time?: string;
+  device_time?: string;
 };
 
 function getEnv(name: string): string {
